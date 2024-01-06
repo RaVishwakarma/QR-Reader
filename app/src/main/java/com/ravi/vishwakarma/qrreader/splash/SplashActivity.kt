@@ -1,16 +1,16 @@
-package com.ravi.vishwakarma.qrreader.ui
+package com.ravi.vishwakarma.qrreader.splash
 
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
-import com.ravi.vishwakarma.qrreader.MainActivity
+import com.ravi.vishwakarma.qrreader.mainActivity.MainActivity
 import com.ravi.vishwakarma.qrreader.R
 
 class SplashActivity : AppCompatActivity() {
@@ -54,14 +54,15 @@ class SplashActivity : AppCompatActivity() {
                 goToMainActivity()
             } else if(isUserPermanentlyDenied()){
                 showGoToAppSettingDialog()
-            }
+            } else
+                requestThePermission()
         }
     }
 
     private fun showGoToAppSettingDialog() {
         AlertDialog.Builder(this)
             .setTitle("Grant Permission!!")
-            .setMessage("we need permissions")
+            .setMessage("we need camera permissions")
             .setPositiveButton("Grant"){dialog, which->
                 goToAppSettings()
             }
@@ -72,18 +73,22 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun goToAppSettings() {
-        var intent = Intent(ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package",packageName,null))
+        val intent = Intent(ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package",packageName,null))
         intent.addCategory(Intent.CATEGORY_DEFAULT)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }
 
     private fun isUserPermanentlyDenied(): Boolean {
-        return shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA).not()
+        return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA).not()
+        }else{
+            return false
+        }
     }
 
     private fun goToMainActivity() {
-        startActivity(Intent(this,MainActivity::class.java))
+        startActivity(Intent(this, MainActivity::class.java))
         finish()
     }
 
